@@ -3,9 +3,13 @@ package com.migia.OperationsHub.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
 import java.util.UUID;
 
+/**
+ * Profile response scoped to the current tenant context.
+ * Only returns the user's role within the organization they authenticated against.
+ * No cross-tenant data is ever returned.
+ */
 @Getter
 @Builder
 public class UserProfileResponse {
@@ -13,14 +17,6 @@ public class UserProfileResponse {
     private final String email;
     private final String firstName;
     private final String lastName;
-    private final List<OrganizationSummary> organizations;
-
-    @Getter
-    @Builder
-    public static class OrganizationSummary {
-        private final UUID id;
-        private final String name;
-        private final String slug;
-        private final String role;
-    }
+    /** The user's role within the current tenant (from TenantContext). */
+    private final String role;
 }

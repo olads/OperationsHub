@@ -44,7 +44,7 @@ class AuthControllerTest {
 
         when(authService.register(any())).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/acme/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload()))
                 .andExpect(status().isCreated())
@@ -57,7 +57,7 @@ class AuthControllerTest {
         when(authService.register(any()))
                 .thenThrow(new ConflictException("An account with email 'jane@example.com' already exists"));
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/acme/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPayload()))
                 .andExpect(status().isConflict())
@@ -78,7 +78,7 @@ class AuthControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/acme/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())
@@ -99,7 +99,7 @@ class AuthControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/acme/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest())

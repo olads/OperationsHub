@@ -6,6 +6,7 @@ import com.migia.OperationsHub.dto.UserProfileResponse;
 import com.migia.OperationsHub.exception.ResourceNotFoundException;
 import com.migia.OperationsHub.model.Membership;
 import com.migia.OperationsHub.model.User;
+import com.migia.OperationsHub.tenancy.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,40 +15,41 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/{orgSlug}/api/v1")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
 
+    /**
+     * Returns the authenticated user's profile scoped to the current tenant.
+     * TenantContext.getCurrentTenant() is set by TenantResolutionFilter — no org list
+     * is returned so cross-tenant information cannot be leaked.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getMe(@AuthenticationPrincipal UserDetails principal) {
         String email = principal.getUsername();
+        UUID currentOrgId = TenantContext.getCurrentTenant();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        List<Membership> memberships = membershipRepository.findByUser_Email(email);
-
-        List<UserProfileResponse.OrganizationSummary> orgSummaries = memberships.stream()
-                .map(m -> UserProfileResponse.OrganizationSummary.builder()
-                        .id(m.getOrganization().getId())
-                        .name(m.getOrganization().getName())
-                        .slug(m.getOrganization().getSlug())
-                        .role(m.getRole().name())
-                        .build())
-                .toList();
+        // Only look up the membership within THIS tenant — no other orgs are queried
+        Membership membership = membershipRepository
+                .findByUser_EmailAndOrganization_Id(email, currentOrgId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User is not a member of this organization"));
 
         UserProfileResponse profile = UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .organizations(orgSummaries)
+                .role(membership.getRole().name())
                 .build();
 
         return ResponseEntity.ok(profile);
