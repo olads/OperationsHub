@@ -26,14 +26,19 @@ public class JwtService {
     }
 
     public String generateAccessToken(User user, UUID organizationId, Role role) {
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(user.getEmail())
-                .claim("org", organizationId.toString())
                 .claim("role", role.name())
+                .claim("mustChangePassword", user.isMustChangePassword())
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key)
-                .compact();
+                .signWith(key);
+                
+        if (organizationId != null) {
+            builder.claim("org", organizationId.toString());
+        }
+        
+        return builder.compact();
     }
 
     public boolean validateToken(String token) {
@@ -51,10 +56,14 @@ public class JwtService {
 
     public UUID extractOrganizationId(String token) {
         String orgClaim = extractClaim(token, claims -> claims.get("org", String.class));
-        return UUID.fromString(orgClaim);
+        return orgClaim != null ? UUID.fromString(orgClaim) : null;
     }
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .build()

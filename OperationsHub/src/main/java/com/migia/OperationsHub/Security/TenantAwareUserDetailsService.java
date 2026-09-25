@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+import com.migia.OperationsHub.tenancy.TenantContext;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class TenantAwareUserDetailsService implements UserDetailsService {
@@ -18,8 +21,16 @@ public class TenantAwareUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        UUID currentOrgId = TenantContext.getCurrentTenant();
+        
+        User user;
+        if (currentOrgId != null) {
+            user = userRepository.findByEmailAndOrganization_Id(email, currentOrgId)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+        } else {
+            user = userRepository.findByEmailAndOrganizationIsNull(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("Platform admin not found: " + email));
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

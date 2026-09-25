@@ -1,10 +1,8 @@
 package com.migia.OperationsHub.RestControllers;
 
-import com.migia.OperationsHub.Repository.MembershipRepository;
 import com.migia.OperationsHub.Repository.UserRepository;
 import com.migia.OperationsHub.dto.UserProfileResponse;
 import com.migia.OperationsHub.exception.ResourceNotFoundException;
-import com.migia.OperationsHub.model.Membership;
 import com.migia.OperationsHub.model.User;
 import com.migia.OperationsHub.tenancy.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserRepository userRepository;
-    private final MembershipRepository membershipRepository;
 
     /**
      * Returns the authenticated user's profile scoped to the current tenant.
@@ -35,21 +32,15 @@ public class UserController {
         String email = principal.getUsername();
         UUID currentOrgId = TenantContext.getCurrentTenant();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        // Only look up the membership within THIS tenant — no other orgs are queried
-        Membership membership = membershipRepository
-                .findByUser_EmailAndOrganization_Id(email, currentOrgId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User is not a member of this organization"));
+        User user = userRepository.findByEmailAndOrganization_Id(email, currentOrgId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found in this organization"));
 
         UserProfileResponse profile = UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .role(membership.getRole().name())
+                .role(user.getRole().name())
                 .build();
 
         return ResponseEntity.ok(profile);

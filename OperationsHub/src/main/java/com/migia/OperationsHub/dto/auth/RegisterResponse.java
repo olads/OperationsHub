@@ -8,8 +8,8 @@ import java.util.UUID;
 @Getter
 @Builder
 public class RegisterResponse {
-    private final UUID userId;
-    private final String email;
-    private final UUID organizationId;
-    private final String organizationSlug;
+    private UUID userId;
+    private String email;
+    private UUID organizationId;
+    private String organizationSlug;
 }

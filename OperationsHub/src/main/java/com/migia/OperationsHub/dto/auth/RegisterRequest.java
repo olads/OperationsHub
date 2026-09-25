@@ -1,11 +1,13 @@
 package com.migia.OperationsHub.dto.auth;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class RegisterRequest {
 
     @NotBlank(message = "First name is required")

@@ -1,11 +1,11 @@
 package com.migia.OperationsHub.RestControllers;
 
 import com.migia.OperationsHub.Service.AuthService;
+import com.migia.OperationsHub.dto.auth.AcceptInvitationRequest;
 import com.migia.OperationsHub.dto.auth.LoginRequest;
 import com.migia.OperationsHub.dto.auth.LoginResponse;
 import com.migia.OperationsHub.dto.auth.LogoutRequest;
 import com.migia.OperationsHub.dto.auth.RefreshRequest;
-import com.migia.OperationsHub.dto.auth.RegisterRequest;
 import com.migia.OperationsHub.dto.auth.RegisterResponse;
 import com.migia.OperationsHub.tenancy.TenantContext;
 import jakarta.validation.Valid;
@@ -24,9 +24,9 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
-        RegisterResponse response = authService.register(request);
+    @PostMapping("/accept-invitation")
+    public ResponseEntity<RegisterResponse> acceptInvitation(@Valid @RequestBody AcceptInvitationRequest request) {
+        RegisterResponse response = authService.acceptInvitationAndRegister(request, TenantContext.getCurrentTenant());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

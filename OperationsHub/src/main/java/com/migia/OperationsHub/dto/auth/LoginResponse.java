@@ -2,13 +2,18 @@ package com.migia.OperationsHub.dto.auth;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponse {
-    private final String accessToken;
-    private final String refreshToken;
+    private String accessToken;
+    private  String refreshToken;
     @Builder.Default
-    private final String tokenType = "Bearer";
-    private final long expiresIn; // seconds
+    private  String tokenType = "Bearer";
+    private long expiresIn; // seconds
+    private boolean mustChangePassword;
 }
