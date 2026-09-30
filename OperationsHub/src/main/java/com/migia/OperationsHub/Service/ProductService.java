@@ -25,6 +25,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final OrganizationRepository organizationRepository;
+    private final AuditService auditService;
 
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request, UUID orgId) {
@@ -51,10 +52,12 @@ public class ProductService {
                 .build();
 
         Product saved = productRepository.save(product);
+        auditService.logEvent(orgId, null, "CREATE", "PRODUCT", saved.getId().toString(), "{\"sku\": \"" + saved.getSku() + "\"}");
         return toProductResponse(saved);
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CachePut(value = "products", key = "#orgId + ':' + #id")
     public ProductResponse updateProduct(UUID id, UpdateProductRequest request, UUID orgId) {
         Product product = productRepository.findByIdAndOrganization_Id(id, orgId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -78,10 +81,12 @@ public class ProductService {
         if (request.getAttributes() != null) product.setAttributes(request.getAttributes());
 
         Product updated = productRepository.save(product);
+        auditService.logEvent(orgId, null, "UPDATE", "PRODUCT", updated.getId().toString(), "{\"sku\": \"" + updated.getSku() + "\"}");
         return toProductResponse(updated);
     }
 
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(value = "products", key = "#orgId + ':' + #id")
     public ProductResponse getProduct(UUID id, UUID orgId) {
         Product product = productRepository.findByIdAndOrganization_Id(id, orgId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -95,10 +100,12 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "products", key = "#orgId + ':' + #id")
     public void deleteProduct(UUID id, UUID orgId) {
         Product product = productRepository.findByIdAndOrganization_Id(id, orgId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         productRepository.delete(product);
+        auditService.logEvent(orgId, null, "DELETE", "PRODUCT", id.toString(), null);
     }
 
     private ProductResponse toProductResponse(Product product) {

@@ -2,6 +2,7 @@ package com.migia.OperationsHub.exception;
 
 import com.migia.OperationsHub.dto.error.ApiError;
 import com.migia.OperationsHub.dto.error.FieldViolation;
+import com.migia.OperationsHub.exception.InvalidPaymentStateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,32 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidOrderStateException.class)
+    public ResponseEntity<ApiError> handleInvalidOrderState(InvalidOrderStateException ex,
+                                                             HttpServletRequest request) {
+        ApiError error = ApiError.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Invalid State Transition")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(InvalidPaymentStateException.class)
+    public ResponseEntity<ApiError> handleInvalidPaymentState(InvalidPaymentStateException ex,
+                                                               HttpServletRequest request) {
+        ApiError error = ApiError.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Invalid Payment State Transition")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(Exception.class)

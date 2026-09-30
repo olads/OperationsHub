@@ -1,26 +1,39 @@
 package com.migia.OperationsHub.event;
 
+import com.migia.OperationsHub.config.RabbitMQConfig;
+import com.migia.OperationsHub.event.dto.OrderCreatedEventV1;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * Listens for OrderCreatedEvent and publishes it downstream (e.g., Kafka, SQS).
- *
- * IMPORTANT: @TransactionalEventListener with phase = AFTER_COMMIT guarantees
- * this handler is ONLY invoked after the originating transaction successfully commits.
- * If the transaction rolls back (e.g., insufficient stock), this handler is never called,
- * satisfying the requirement that OrderCreated is not published for rolled-back transactions.
- */
+import java.time.Instant;
+import java.util.UUID;
+
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OrderEventPublisher {
+
+    private final RabbitTemplate rabbitTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderCreated(OrderCreatedEvent event) {
         log.info("[ORDER EVENT] OrderCreated: orderId={}, orgId={}, total={}",
                 event.getOrderId(), event.getOrganizationId(), event.getTotalAmount());
-        // TODO: publish to message broker (Kafka/SQS) in a real implementation
+        
+        OrderCreatedEventV1 dto = new OrderCreatedEventV1(
+                UUID.randomUUID().toString(),
+                1,
+                event.getOrderId(),
+                event.getOrganizationId(),
+                event.getTotalAmount(),
+                Instant.now()
+        );
+        
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY_ORDER_CREATED, dto);
+        log.info("Published OrderCreatedEventV1 for orderId={} to RabbitMQ", event.getOrderId());
     }
 }

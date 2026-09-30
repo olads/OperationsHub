@@ -71,6 +71,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/admin/auth/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/invitations/*").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // Webhook endpoints receive unauthenticated callbacks from payment providers
+                .requestMatchers("/api/webhooks/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
