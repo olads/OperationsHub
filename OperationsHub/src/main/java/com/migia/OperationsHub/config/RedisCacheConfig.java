@@ -16,7 +16,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Slf4j
-@Configuration
+//@Configuration
 public class RedisCacheConfig implements CachingConfigurer {
 
     @Bean

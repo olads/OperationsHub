@@ -14,10 +14,14 @@ import com.migia.OperationsHub.tenancy.TenantContext;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+
 public class TenantAwareUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
+    public TenantAwareUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

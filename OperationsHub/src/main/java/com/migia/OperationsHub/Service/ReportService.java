@@ -17,7 +17,7 @@ public class ReportService {
     public List<Map<String, Object>> getSalesByDate(UUID orgId) {
         String sql = "SELECT DATE(created_at) as date, SUM(totals) as total_sales " +
                      "FROM orders " +
-                     "WHERE organization_id = ? AND status IN (2, 3) " + // PAID, COMPLETED
+                     "WHERE organization_id = ? AND status IN ('PAID', 'COMPLETED', '2', '3') " + // PAID, COMPLETED
                      "GROUP BY DATE(created_at) " +
                      "ORDER BY date DESC";
         return jdbcTemplate.queryForList(sql, orgId.toString());
@@ -36,7 +36,7 @@ public class ReportService {
                      "FROM order_items oi " +
                      "JOIN orders o ON oi.order_id = o.id " +
                      "JOIN products p ON oi.product_id = p.id " +
-                     "WHERE o.organization_id = ? AND o.status IN (2, 3) " + // PAID, COMPLETED
+                     "WHERE o.organization_id = ? AND o.status IN ('PAID', 'COMPLETED', '2', '3') " + // PAID, COMPLETED
                      "GROUP BY p.id, p.name, p.sku " +
                      "ORDER BY total_sold DESC " +
                      "LIMIT ?";
@@ -53,7 +53,7 @@ public class ReportService {
 
     public List<Map<String, Object>> getPaymentSuccessFailure(UUID orgId) {
         String sql = "SELECT status, COUNT(*) as count " +
-                     "FROM payment " +
+                     "FROM payments " +
                      "WHERE organization_id = ? " +
                      "GROUP BY status";
         return jdbcTemplate.queryForList(sql, orgId.toString());

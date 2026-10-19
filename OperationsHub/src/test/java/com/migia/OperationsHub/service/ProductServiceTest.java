@@ -43,6 +43,7 @@ class ProductServiceTest {
 
     @Mock private ProductRepository productRepository;
     @Mock private OrganizationRepository organizationRepository;
+    @Mock private com.migia.OperationsHub.Service.AuditService auditService;
 
     @InjectMocks
     private ProductService productService;

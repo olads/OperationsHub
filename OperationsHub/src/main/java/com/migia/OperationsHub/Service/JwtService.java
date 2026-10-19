@@ -3,6 +3,7 @@ package com.migia.OperationsHub.Service;
 import com.migia.OperationsHub.model.User;
 import com.migia.OperationsHub.model.enums.Role;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,17 @@ public class JwtService {
         this.jwtExpirationMs = jwtExpirationMs;
     }
 
+
+    public String generateAdminToken(User user){
+      JwtBuilder builder = Jwts.builder()
+                .subject(user.getEmail())
+                .claim("role", Role.PLATFORM_ADMIN.name())
+                .claim("passwordChange", true)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key);
+      return builder.compact();
+    }
     public String generateAccessToken(User user, UUID organizationId, Role role) {
         var builder = Jwts.builder()
                 .subject(user.getEmail())
