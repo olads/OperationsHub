@@ -1,5 +1,6 @@
 package com.migia.OperationsHub.controller;
 
+import org.testcontainers.shaded.org.hamcrest.Matchers;
 import tools.jackson.databind.json.JsonMapper;
 import com.migia.OperationsHub.Repository.CustomerRepository;
 import com.migia.OperationsHub.Repository.OrganizationRepository;
@@ -172,7 +173,7 @@ class CustomerBackOfficeFlowTest {
                         .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.totalElements").value(Matchers.greaterThanOrEqualTo(1)));
     }
 
     @Test

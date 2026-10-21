@@ -179,7 +179,7 @@ class ReportsFlowTest {
                 .product(p1)
                 .quantity(1)
                 .unitPrice(BigDecimal.valueOf(50.00))
-                .totalPrice(BigDecimal.valueOf(50.00))
+                .unitPrice(BigDecimal.valueOf(50.00))
                 .build();
 
         OrderItem item2 = OrderItem.builder()
@@ -187,7 +187,7 @@ class ReportsFlowTest {
                 .product(p2)
                 .quantity(1)
                 .unitPrice(BigDecimal.valueOf(100.00))
-                .totalPrice(BigDecimal.valueOf(100.00))
+                .unitPrice(BigDecimal.valueOf(100.00))
                 .build();
 
         completedOrder.setItems(new ArrayList<>(List.of(item1, item2)));

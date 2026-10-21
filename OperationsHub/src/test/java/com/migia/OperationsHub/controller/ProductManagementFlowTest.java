@@ -406,6 +406,6 @@ class ProductManagementFlowTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.totalPages").value(org.getId() != null ? 2 : 2));
+                .andExpect(jsonPath("$.totalPages").value(2));
     }
 }
